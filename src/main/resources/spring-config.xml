@@ -2,11 +2,18 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="
        http://www.springframework.org/schema/beans
-       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context-3.0.xsd
        http://www.springframework.org/schema/aop
-       http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
+       http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
+
+
+    <context:component-scan base-package="com" />
+    <context:annotation-config/>
 
     <bean id="helloWorld" class="com.tutorialspoint.HelloWorld"
           init-method="init" destroy-method="destroy">
@@ -14,15 +21,15 @@
     </bean>
 
     <!--BeanPostProcessor-->
-    <bean class="com.tutorialspoint.InitHelloWorld"/>
-    <bean class="com.springindepth.DoublerBeanPostProcessor"/>
+    <!--<bean class="com.tutorialspoint.InitHelloWorld"/>-->
+    <!--<bean class="com.springindepth.DoublerBeanPostProcessor"/>-->
 
 
-    <bean id="doubler" class="com.springindepth.DoublerBean">
-        <property name="value" value="2" />
-    </bean>
+    <!--<bean id="doubler" class="com.springindepth.DoublerBean">-->
+    <!--<property name="value" value="2" />-->
+    <!--</bean>-->
 
-    <bean id="performerImpl" class="com.aop.PerformerImpl"/>
+    <!--<bean id="performerImpl" class="com.aop.PerformerImpl"/>-->
 
     <bean id="handler" class="com.aop.Audience"/>
 
@@ -31,35 +38,67 @@
     <bean id="volunteerThinker" class="com.aop.arg.Volunteer"/>
 
 
+    <bean id="student" class="com.aop.declareparent.StudentImpl">
+        <property name="studentNo" value="1001"/>
+        <property name="studentName" value="John Peter"/>
+    </bean>
+
+    <bean id="studentAdditionalDetails" class="com.aop.declareparent.StudentAdditionalDetailsImpl">
+        <property name="city" value="Newyork"/>
+        <property name="country" value="America"/>
+    </bean>
 
     <aop:config>
 
         <!--aspect 1-->
         <!--<aop:aspect id="aspect1" ref="handler">-->
-            <!--<aop:pointcut id="pointPerformer" expression="execution(* com.aop.Performer.perform(..)))"/>-->
+        <!--<aop:pointcut id="pointPerformer" expression="execution(* com.aop.Performer.perform(..)))"/>-->
 
-            <!--<aop:before method="takeseats"  pointcut-ref="pointPerformer"/>-->
-            <!--<aop:before method="turnOffCellPhones"  pointcut-ref="pointPerformer"/>-->
-            <!--<aop:after-returning method="applaud"  pointcut-ref="pointPerformer"/>-->
-            <!--<aop:after-throwing method="demandRefund"  pointcut-ref="pointPerformer"/>-->
+        <!--<aop:before method="takeseats"  pointcut-ref="pointPerformer"/>-->
+        <!--<aop:before method="turnOffCellPhones"  pointcut-ref="pointPerformer"/>-->
+        <!--<aop:after-returning method="applaud"  pointcut-ref="pointPerformer"/>-->
+        <!--<aop:after-throwing method="demandRefund"  pointcut-ref="pointPerformer"/>-->
         <!--</aop:aspect>-->
 
         <!--aspect 2 around-->
         <aop:aspect id="aspect_around" ref="handler">
             <aop:pointcut id="pointPerformer2" expression="execution(* com.aop.Performer.perform(..)))"/>
 
-            <aop:around pointcut-ref="pointPerformer2" method="watchPerformance" />
+            <aop:around pointcut-ref="pointPerformer2" method="watchPerformance"/>
         </aop:aspect>
 
         <!--aspect 3 arg-->
         <!--magican.interceptThoughts - thinkingPoint-->
         <aop:aspect id="aspect_arg" ref="magican">
-            <aop:pointcut id="thinkingPoint" expression="execution(* com.aop.arg.Thinker.thinkOfSomething(String)) and args(thought))"/>
+            <aop:pointcut id="thinkingPoint"
+                          expression="execution(* com.aop.arg.Thinker.thinkOfSomething(String)) and args(thought))"/>
 
             <!--set advice's arg-name here,this arg will get point's arg-->
             <aop:before pointcut-ref="thinkingPoint" method="interceptThoughts" arg-names="thought"/>
         </aop:aspect>
 
+
+        <!--decare parent add new method-->
+        <aop:aspect>
+            <aop:declare-parents types-matching="com.aop.declareparent.StudentAdditionalDetails+"
+                                 implement-interface="com.aop.declareparent.Student" delegate-ref="student"/>
+        </aop:aspect>
+
     </aop:config>
+
+
+    <!--data source config-->
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+        <property name="driverClassName" value="com.mysql.jdbc.Driver" />
+        <property name="url" value="jdbc:mysql://localhost:3306/test" />
+        <property name="username" value="root" />
+        <property name="password" value="111111" />
+    </bean>
+
+    <!--jdbc template config-->
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.simple.SimpleJdbcTemplate">
+        <constructor-arg><ref bean="dataSource"/></constructor-arg>
+    </bean>
+
 
 </beans>
