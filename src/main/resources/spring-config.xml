@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
+
+    <bean id="helloWorld" class="com.tutorialspoint.HelloWorld"
+          init-method="init" destroy-method="destroy">
+        <property name="message" value="Hello World!"/>
+    </bean>
+
+    <!--BeanPostProcessor-->
+    <bean class="com.tutorialspoint.InitHelloWorld"/>
+    <bean class="com.springindepth.DoublerBeanPostProcessor"/>
+
+
+    <bean id="doubler" class="com.springindepth.DoublerBean">
+        <property name="value" value="2" />
+    </bean>
+
+    <bean id="performerImpl" class="com.aop.PerformerImpl"/>
+
+    <bean id="handler" class="com.aop.Audience"/>
+
+    <bean id="magican" class="com.aop.arg.Magican"/>
+
+    <bean id="volunteerThinker" class="com.aop.arg.Volunteer"/>
+
+
+
+    <aop:config>
+
+        <!--aspect 1-->
+        <!--<aop:aspect id="aspect1" ref="handler">-->
+            <!--<aop:pointcut id="pointPerformer" expression="execution(* com.aop.Performer.perform(..)))"/>-->
+
+            <!--<aop:before method="takeseats"  pointcut-ref="pointPerformer"/>-->
+            <!--<aop:before method="turnOffCellPhones"  pointcut-ref="pointPerformer"/>-->
+            <!--<aop:after-returning method="applaud"  pointcut-ref="pointPerformer"/>-->
+            <!--<aop:after-throwing method="demandRefund"  pointcut-ref="pointPerformer"/>-->
+        <!--</aop:aspect>-->
+
+        <!--aspect 2 around-->
+        <aop:aspect id="aspect_around" ref="handler">
+            <aop:pointcut id="pointPerformer2" expression="execution(* com.aop.Performer.perform(..)))"/>
+
+            <aop:around pointcut-ref="pointPerformer2" method="watchPerformance" />
+        </aop:aspect>
+
+        <!--aspect 3 arg-->
+        <!--magican.interceptThoughts - thinkingPoint-->
+        <aop:aspect id="aspect_arg" ref="magican">
+            <aop:pointcut id="thinkingPoint" expression="execution(* com.aop.arg.Thinker.thinkOfSomething(String)) and args(thought))"/>
+
+            <!--set advice's arg-name here,this arg will get point's arg-->
+            <aop:before pointcut-ref="thinkingPoint" method="interceptThoughts" arg-names="thought"/>
+        </aop:aspect>
+
+    </aop:config>
+
+</beans>
