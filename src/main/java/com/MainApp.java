@@ -30,7 +30,8 @@ public class MainApp {
 
             receive.setAccount(111111111);
 //            service.updateEmployeeAccount(pay);
-            service.trasferAccount(pay,receive,11);
+//            service.trasferAccount(pay,receive,11);
+            service.trasferAccountAnno(pay,receive,11);
 //           dao.addEmployee(e1);
 //            dao.updateEmployeeAccount(e1);
 //        Performer performer = (Performer) context.getBean("performerImpl");

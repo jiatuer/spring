@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -15,6 +17,7 @@ import java.util.List;
  */
 
 @Component("EmployeeService")
+@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
 public class EmployeeService {
 
     private TransactionTemplate transactionTemplate;
@@ -30,7 +33,7 @@ public class EmployeeService {
     }
 
 
-    public Employee findEmployeeByName(String name){
+    public Employee findEmployeeByName(String name) {
         return employeeDao.findEmployeeByName(name);
     }
 
@@ -39,52 +42,60 @@ public class EmployeeService {
     }
 
 
-    public List findEmployee(){
+    public List findEmployee() {
         return employeeDao.findEmployee();
     }
 
-    public void addEmploee(final Employee employee){
+    public void addEmploee(final Employee employee) {
         transactionTemplate.execute(new TransactionCallback<Object>() {
                                         @Override
                                         public Object doInTransaction(TransactionStatus transactionStatus) {
                                             try {
                                                 employeeDao.addEmployee(employee);
-                                            }catch (RuntimeException e){
+                                            } catch (RuntimeException e) {
                                                 transactionStatus.setRollbackOnly();
                                                 throw e;
                                             }
                                             return null;
                                         }
                                     }
-
         );
 
     }
 
 
-    public void updateEmployeeAccount(Employee employee){
+    public void updateEmployeeAccount(Employee employee) {
         employeeDao.updateEmployeeAccount(employee);
     }
 
-    public void trasferAccount(final Employee pay,final Employee receive,final int account){
+    public void trasferAccount(final Employee pay, final Employee receive, final int account) {
 
         transactionTemplate.execute(new TransactionCallback<Object>() {
                                         @Override
                                         public Object doInTransaction(TransactionStatus transactionStatus) {
                                             try {
-                                                pay.setAccount(pay.getAccount()-account);
-                                                receive.setAccount(receive.getAccount()+account);
+                                                pay.setAccount(pay.getAccount() - account);
+                                                receive.setAccount(receive.getAccount() + account);
                                                 employeeDao.updateEmployeeAccount(pay);
                                                 employeeDao.updateEmployeeAccount(receive);
-                                            }catch (RuntimeException e){
+                                            } catch (RuntimeException e) {
                                                 transactionStatus.setRollbackOnly();
                                                 throw e;
                                             }
                                             return null;
                                         }
                                     }
-
         );
+
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED,readOnly = false)
+    public void trasferAccountAnno(final Employee pay, final Employee receive, final int account) {
+
+        pay.setAccount(pay.getAccount() - account);
+        receive.setAccount(receive.getAccount() + account);
+        employeeDao.updateEmployeeAccount(pay);
+        employeeDao.updateEmployeeAccount(receive);
 
     }
 
